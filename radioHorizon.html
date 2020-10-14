@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <style>
+    label {
+      display: block;
+      color: #7d7d7d;
+    }
+
+    .floatBlock {
+      margin: 0 20px 0 0;
+    }
+
+    .labelish {
+      color: #7d7d7d;
+      margin: 0;
+    }
+
+    .paymentOptions {
+      border: none;
+      display: flex;
+      flex-direction: row;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="paymentContainer" name="paymentContainer" class="paymentOptions">
+    <p class="labelish">Payment Method:</p>
+
+    <div id="payCC" class="floatBlock">
+      <label><input name="paymentType" type="radio" value="CREDIT_CARD" /> Credit Card
+      </label>
+    </div>
+
+    <div id="payInvoice" class="floatBlock">
+      <label> <input name="paymentType" type="radio" value="INVOICE" /> Invoice
+      </label>
+    </div>
+
+    <div id="pay3rdParty" class="floatBlock">
+      <label> <input name="paymentType" type="radio" /> Third Party </label>
+    </div>
+
+  </div>
+
+  <script>
+    var currentValue = 0;
+    function handleClick(myRadio) {
+      console.log(myRadio);
+      // currentValue = myRadio.value;
+    }
+  </script>
+</body>
+
+</html>

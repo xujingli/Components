@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+</head>
+
+<body>
+    <svg id="mysvg" width="900" height="800"></svg>
+    <script>
+        var svg = d3.select("svg");
+        var width = svg.attr("width");
+        var height = svg.attr("height");
+        var margin = { top: 60, bottom: 60, left: 60, right: 60 };
+
+        var dataset = [
+            [0.5, 0.5], [0.7, 0.8], [0.4, 0.9],
+            [0.11, 0.32], [0.88, 0.25], [0.75, 0.12],
+            [0.5, 0.1], [0.2, 0.3], [0.4, 0.1], [0.6, 0.7],
+            [1.5, 1.5], [2.8, 2.8], [1.38, 2.68]
+        ];
+        var xScale = d3.scaleLinear()
+            .domain([0, d3.max(dataset, (d) => { return d[0] })])
+            .range([0, width - margin.left - margin.right]);
+
+        var RxScale = d3.scaleLinear()
+            .domain([0, width - margin.left - margin.right])
+            .range([0, d3.max(dataset, (d) => { return d[0] })]);  //逆映射
+
+
+        var yScale = d3.scaleLinear()
+            .domain([0, d3.max(dataset, (d) => { return d[1] })])
+            .range([height - margin.top - margin.bottom, 0]);
+
+        var RyScale = d3.scaleLinear()
+            .domain([height - margin.top - margin.bottom, 0])
+            .range([0, d3.max(dataset, (d) => { return d[1] })]);
+
+        //拖拽函数
+        var drag = d3.drag()
+            .subject((d, i) => {
+                return { x: d.cx, y: d.cy }
+            })
+            .on("start", function (d) {
+                //console.log("拖拽开始");
+            })
+            .on("end", function (d) {
+                //console.log("拖拽结束");
+            })
+            .on("drag", function (d) {
+                d3.select(this)
+                    .attr("cx", d.cx = d3.event.x)
+                    .attr("cy", d.cy = d3.event.y);
+
+            });
+
+        var tooltip = d3.select("body")
+            .append("div")
+            .style("position", "absolute")
+            .style("z-index", "10")
+            .style("visibility", "hidden")
+            .text("a simple tooltip");
+
+        //绘制圆
+        var circle = svg.selectAll("circle")
+            .data(dataset)
+            .enter()
+            .append("circle")
+            .attr("fill", "blue")
+            .attr("cx", (d) => { return margin.left + xScale(d[0]) })
+            .attr("cy", (d) => { return yScale(d[1]) + margin.top })
+            .attr("r", 5)
+            .on("mouseover", function (d) {  //3、hover
+                d3.select(this)
+                    .attr("r", 10)
+                    .attr("fill", "red")
+
+                return tooltip.text("(" + RxScale(this.cx.animVal.value - margin.left).toFixed(2) + "," + RyScale(this.cy.animVal.value - margin.top).toFixed(2) + ")")
+                    .style("visibility", "visible");
+            })
+            .on("mouseout", function (d, i) {
+                d3.select(this)
+                    .transition()
+                    .duration(500)
+                    .attr("r", 5)
+                    .attr("fill", "blue");
+                d[0] = RxScale(this.cx.animVal.value - margin.left);   //更改移动点的坐标
+                d[1] = RyScale(this.cy.animVal.value - margin.top);
+                return tooltip.style("visibility", "hidden");
+            })
+            .on("mousemove", function (d) {     //跟着鼠标移动
+                // console.log(this.cx.animVal.value);
+                return tooltip.text("(" + RxScale(this.cx.animVal.value - margin.left).toFixed(2) + "," + RyScale(this.cy.animVal.value - margin.top).toFixed(2) + ")")
+                    .style("top", (d3.event.pageY - 10) + "px")
+                    .style("left", (d3.event.pageX + 10) + "px")
+                    .style("visibility", "visible");
+            })
+            .on("dblclick", function (d, i) {   //2、双击删除
+                d3.select(this).remove();
+                // console.log(dataset.indexOf(d));
+                dataset.splice(dataset.indexOf(d), 1);   //彻底删除数据
+                return tooltip.style("visibility", "hidden");
+            })
+            .call(drag)    //1、单击拖拽
+
+        //坐标轴
+        var xAxis = d3.axisBottom(xScale);
+        var yAxis = d3.axisLeft(yScale);
+
+        var g = svg.append("g")
+            .attr("transform", "translate(" + margin.top + "," + margin.left + ")");
+
+        g.append("g")
+            .attr("transform", "translate(" + 0 + "," + (height - margin.top - margin.bottom) + ")")
+            .call(xAxis);
+        //console.logheight-margin.top-margin.bootom);
+        g.append("g")
+            .attr("transform", "translate(0,0)")
+            .call(yAxis);
+
+
+        //绘制矩形选框
+        var clickTime = "";
+        var startLoc = [];
+        var endLoc = [];
+        var flag = "";
+
+        function drawSquare() { //绘制函数
+            var rect = svg.append("rect")
+                .attr("width", 0)
+                .attr("height", 0)
+                .attr("fill", "rgba(33,20,50,0.3)")
+                .attr("stroke", "#ccc")
+                .attr("stroke-width", "2px")
+                .attr("transform", "translate(0,0)")
+                .attr("id", "squareSelect");
+
+            svg.on("mousedown", function () {
+                // console.log("asdfasdljkfhaklsdjfh");
+                clickTime = (new Date()).getTime();//mark start time
+                flag = true;//以flag作为可执行圈选的标记
+                rect.attr("transform", "translate(" + d3.event.layerX + "," + d3.event.layerY + ")");   //圈选起点
+                startLoc = [d3.event.layerX, d3.event.layerY];  //记录起点
+
+                d3.selectAll("div")
+                    .style("visibility", "hidden");
+            });
+
+            svg.on("mousemove", function () {
+                //判断事件target
+                if ((d3.event.target.localName == "svg" && flag == true) || (d3.event.target.localName == "rect" && flag == true)) {
+                    var width = d3.event.layerX - startLoc[0];
+                    var height = d3.event.layerY - startLoc[1];
+                    if (width < 0) {
+                        rect.attr("transform", "translate(" + d3.event.layerX + "," + startLoc[1] + ")");
+                    }
+                    if (height < 0) {
+                        rect.attr("transform", "translate(" + startLoc[0] + "," + d3.event.layerY + ")");
+                    }
+                    if (height < 0 && width < 0) {
+                        rect.attr("transform", "translate(" + d3.event.layerX + "," + d3.event.layerY + ")");
+                    }
+                    rect.attr("width", Math.abs(width))
+                        .attr("height", Math.abs(height))
+                }
+            })
+
+            svg.on("mouseup", function (d) {
+                if (flag == true) {
+                    flag = false;
+                    endLoc = [d3.event.layerX, d3.event.layerY];
+                    // console.log([d3.event.layerX, d3.event.layerY]);
+                    var leftTop = [];   //左上角
+                    var rightBottom = [];      //右下角
+                    if (endLoc[0] >= startLoc[0]) {
+                        leftTop[0] = startLoc[0];
+                        rightBottom[0] = endLoc[0];
+                    } else {
+                        leftTop[0] = endLoc[0];
+                        rightBottom[0] = startLoc[0];
+                    }
+
+                    if (endLoc[1] >= startLoc[1]) {
+                        leftTop[1] = startLoc[1];
+                        rightBottom[1] = endLoc[1];
+                    } else {
+                        leftTop[1] = endLoc[1];
+                        rightBottom[1] = startLoc[1];
+                    }
+
+                    // console.log(leftTop);
+                    // console.log(rightBottom);
+
+                    var count = 0;
+                    for (let i = 0; i < dataset.length; i++) {
+                        if ((margin.left + xScale(dataset[i][0])) > leftTop[0] && (margin.left + xScale(dataset[i][0])) < rightBottom[0]
+                            && (yScale(dataset[i][1]) + margin.top) > leftTop[1] && (yScale(dataset[i][1]) + margin.top) < rightBottom[1]) {
+
+                            d3.select("body")
+                                .append("div")
+                                .style("position", "absolute")
+                                .style("z-index", "10")
+                                .style("top", width - margin.bottom + count * 20 + "px")
+                                .style("left", margin.left + "px")
+                                .text("(" + dataset[i][0].toFixed(2) + "," + dataset[i][1].toFixed(2) + ")")
+                                .style("visibility", "visible");
+
+                            count++;
+                        }
+                    }
+
+                    // var nodes = svg.selectAll("nodes")
+                    //                 .data(dataset)
+                    //                 .join('nodes')
+                    //                 // .enter()
+                    //                 // .append("nodes")
+                    //                 .attr("temp",function(d){
+                    //                     if( (margin.left + xScale(d[0])) > leftTop[0] && (margin.left + xScale(d[0])) < rightBottom[0] 
+                    //                         && (yScale(d[1]) + margin.top) > leftTop[1] &&  (yScale(d[1]) + margin.top) < rightBottom[1] ){
+
+                    //                         console.log("(" + d[0].toFixed(2) + ","+ d[1].toFixed(2) + ")");
+                    //                         count++;
+                    //                         return d3.select("body")
+                    //                                 .append("div")
+                    //                                 .style("position", "absolute")
+                    //                                 .style("z-index", "10")
+                    //                                 .style("top",width - margin.bottom + count * 20 +"px")
+                    //                                 .style("left",margin.left+"px")
+                    //                                 .text("(" + d[0].toFixed(2) + ","+ d[1].toFixed(2) + ")" )
+                    //                                 .style("visibility", "visible");
+                    //                     }
+                    //                 }); 
+
+                    rect.attr("width", 0).attr("height", 0);
+                }
+            })
+        }
+
+        drawSquare();
+    </script>
+
+    <table>
+
+    </table>
+</body>
+
+</html>

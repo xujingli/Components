@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+
+<head>
+  <meta charset="utf-8">
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+  <style>
+
+  </style>
+</head>
+
+<body>
+  <svg width="960" height="500"></svg>
+  <script>
+    const lineChartSize = { width: 50, height: 50 };
+
+    let svg = d3.selectAll("svg");
+    svg.append("rect")
+      .attr("class", "layerNodeInnerLineChart-zoom")
+      .attr("width", lineChartSize.width)
+      .attr("height", lineChartSize.height)
+      .attr("transform", "translate(100,100)")
+      .attr("opacity", 0.5);
+
+    svg
+      .select("rect.layerNodeInnerLineChart-zoom")
+      .on("mousemove", function () {
+        let coordinate = d3.mouse(this);
+
+        console.log("move", coordinate);
+      })
+      .on("mouseleave", function () {
+        let coordinate = d3.mouse(this);
+
+        console.log("leave", coordinate);
+      })
+      .on("click", function () {
+        let coordinate = d3.mouse(this);
+
+        console.log("click", coordinate);
+      });
+  </script>
+</body>

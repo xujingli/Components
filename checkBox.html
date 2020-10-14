@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<!-- https://freefrontend.com/css-checkboxes/ -->
+
+<head>
+  <style>
+    input[type="checkbox"] {
+      display: none;
+    }
+
+    input[type="checkbox"]+label {
+      font-size: 14px;
+    }
+
+    input[type="checkbox"]+label:before {
+      content: '';
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 1px solid green;
+      /* border-radius: 50%; */
+      vertical-align: middle;
+      margin-right: 8px;
+      transition: all .5s;
+    }
+
+    input[type="checkbox"]:checked+label:before {
+      background: red;
+    }
+  </style>
+</head>
+
+<body>
+  <input type="checkbox" id="hello">
+  <label for="hello">hello</label>
+  <input type="checkbox" id="hello1">
+  <label for="hello1">hello1</label>
+</body>
+
+</html>
