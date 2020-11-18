@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>learn-pixi</title>
+  <script src="pixi.js"></script>
+</head>
+
+<body>
+  <div id="GraphContainer"></div>
+  <script>
+    const app = new PIXI.Application({
+      antialias: true
+    });
+    document.body.appendChild(app.view);
+
+    const drawRoundCorner = (beginPos, endPos, r, direction, width, color, alpha) => { // direction分为 rd ul .....
+      // 首先将pos.x较小的作为起点
+      let begin, end;
+      if (beginPos.x < endPos.x) {
+        begin = beginPos;
+        end = endPos;
+      } else {
+        begin = endPos;
+        end = beginPos;
+      }
+
+      const bezier = new PIXI.Graphics();
+      bezier.lineStyle(width, color, alpha);
+
+      if (direction === "rd" || direction === "ul") { // 左上 -> 右下
+        bezier.moveTo(0, 0);
+        bezier.quadraticCurveTo(r, 0, r, r);
+        app.stage.addChild(bezier);
+        bezier.position.x = begin.x; // 第一象限圆弧，中点在起始点
+        bezier.position.y = begin.y;
+      } else if (direction === "dl" || direction === "ru") {
+        bezier.moveTo(0, r);
+        bezier.quadraticCurveTo(r, r, r, 0);
+        app.stage.addChild(bezier);
+        bezier.position.x = begin.x; // 第二象限圆弧
+        bezier.position.y = begin.y - r;
+      } else if (direction === "lu" || direction === "dr") {
+        bezier.moveTo(0, 0);
+        bezier.quadraticCurveTo(0, r, r, r);
+        app.stage.addChild(bezier); // 第三象限圆弧，中点在
+        bezier.position.x = begin.x;
+        bezier.position.y = begin.y;
+      } else if (direction === "ur" || direction === "ld") {
+        bezier.moveTo(0, r);
+        bezier.quadraticCurveTo(0, 0, r, 0);
+        app.stage.addChild(bezier);
+        bezier.position.x = begin.x;
+        bezier.position.y = begin.y - r;
+      }
+
+      return bezier;
+    }
+
+    const line = new PIXI.Graphics();
+    line.lineStyle(5, 0xAAAA00, 1);
+    line.moveTo(400, 0);
+    line.lineTo(100, 0);
+    app.stage.addChild(line);
+    app.stage.addChild(drawRoundCorner({
+      x: 100,
+      y: 0
+    }, {
+      x: 0,
+      y: 100
+    }, 100, "ld", 5, 0xAA0000, 1));
+
+    const line3 = new PIXI.Graphics();
+    line3.lineStyle(5, 0xAAAA00, 1);
+    line3.moveTo(0, 100);
+    line3.lineTo(0, 400);
+    app.stage.addChild(line3);
+    app.stage.addChild(drawRoundCorner({
+      x: 0,
+      y: 400
+    }, {
+      x: 100,
+      y: 500
+    }, 100, "dr", 5, 0xAA0000, 1));
+
+    const line2 = new PIXI.Graphics();
+    line2.lineStyle(5, 0xAAAA00, 1);
+    line2.moveTo(100, 500);
+    line2.lineTo(400, 500);
+    app.stage.addChild(line2);
+    app.stage.addChild(drawRoundCorner({
+      x: 400,
+      y: 500
+    }, {
+      x: 500,
+      y: 400
+    }, 100, "ru", 5, 0xAA0000, 1));
+
+    const line1 = new PIXI.Graphics();
+    line1.lineStyle(5, 0xAAAA00, 1);
+    line1.moveTo(500, 400);
+    line1.lineTo(500, 100);
+    app.stage.addChild(line1);
+    app.stage.addChild(drawRoundCorner({
+      x: 500,
+      y: 100
+    }, {
+      x: 400,
+      y: 0
+    }, 100, "ul", 5, 0xAA0000, 1));
+
+    // const line = new PIXI.Graphics();
+    // line.lineStyle(5, 0xAAAA00, 1);
+    // line.moveTo(100, 0);
+    // line.lineTo(100 + 300, 0);
+    // app.stage.addChild(line);
+    // app.stage.addChild(drawRoundCorner({
+    //   x: 400,
+    //   y: 0
+    // }, {
+    //   x: 500,
+    //   y: 100
+    // }, 100, "rd", 5, 0xAA0000, 1));
+
+    // const line1 = new PIXI.Graphics();
+    // line1.lineStyle(5, 0xAAAA00, 1);
+    // line1.moveTo(500, 100);
+    // line1.lineTo(500, 100 + 300);
+    // app.stage.addChild(line1);
+    // app.stage.addChild(drawRoundCorner({
+    //   x: 500,
+    //   y: 400
+    // }, {
+    //   x: 400,
+    //   y: 500
+    // }, 100, "dl", 5, 0xAA0000, 1));
+
+    // const line2 = new PIXI.Graphics();
+    // line2.lineStyle(5, 0xAAAA00, 1);
+    // line2.moveTo(400, 500);
+    // line2.lineTo(100, 500);
+    // app.stage.addChild(line2);
+    // app.stage.addChild(drawRoundCorner({
+    //   x: 100,
+    //   y: 500
+    // }, {
+    //   x: 0,
+    //   y: 400
+    // }, 100, "lu", 5, 0xAA0000, 1));
+
+    // const line3 = new PIXI.Graphics();
+    // line3.lineStyle(5, 0xAAAA00, 1);
+    // line3.moveTo(0, 400);
+    // line3.lineTo(0, 100);
+    // app.stage.addChild(line3);
+
+    // app.stage.addChild(drawRoundCorner({
+    //   x: 0,
+    //   y: 100
+    // }, {
+    //   x: 100,
+    //   y: 0
+    // }, 100, "ur", 5, 0xAA0000, 1));
+
+
+
+    // const r = 100;
+
+    // const bezier = new PIXI.Graphics();
+    // bezier.lineStyle(5, 0xAA0000, 1);
+    // bezier.moveTo(0, r);
+    // bezier.quadraticCurveTo(r, r, r, 0);
+    // app.stage.addChild(bezier);
+    // bezier.position.x = r; // 第二象限圆弧， 默认position都是0
+    // bezier.position.y = r;
+
+    // const bezier1 = new PIXI.Graphics();
+    // bezier1.lineStyle(5, 0xAA0000, 1);
+    // bezier1.moveTo(0, 0);
+    // bezier1.quadraticCurveTo(r, 0, r, r);
+    // app.stage.addChild(bezier1);
+    // bezier1.position.x = r; // 第一象限圆弧，中点在起始点
+    // bezier1.position.y = 0;
+
+    // const bezier2 = new PIXI.Graphics();
+    // bezier2.lineStyle(5, 0xAA0000, 1);
+    // bezier2.moveTo(0, 0);
+    // bezier2.quadraticCurveTo(0, r, r, r);
+    // app.stage.addChild(bezier2); // 第三象限圆弧，中点在
+    // bezier2.position.x = 0;
+    // bezier2.position.y = r;
+
+    // const bezier3 = new PIXI.Graphics();
+    // bezier3.lineStyle(5, 0xAA0000, 1);
+    // bezier3.moveTo(0, r);
+    // bezier3.quadraticCurveTo(0, 0, r, 0);
+    // app.stage.addChild(bezier3);
+    // bezier3.position.x = 0;
+    // bezier3.position.y = 0;
+
+
+
+    // 绘制半圆
+  </script>
+</body>
+
+</html>
