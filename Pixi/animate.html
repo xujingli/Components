@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>learn-pixi</title>
+  <script src="pixi.js"></script>
+  <script src="gsap.js"></script>
+</head>
+
+<body>
+  <div id="GraphContainer"></div>
+  <script>
+    gsap.registerPlugin(gsap.PixiPlugin);
+    PixiPlugin.registerPIXI(PIXI);
+
+    const loader = PIXI.Loader.shared;
+
+    const app = new PIXI.Application({
+      width: 300,
+      height: 300,
+      antialias: true,
+      transparent: false,
+      resolution: 1,
+      backgroundColor: 0x1d9ce0
+    });
+
+
+    document.body.appendChild(app.view);
+
+    loader
+      .add('bili', 'http://pic.deepred5.com/bilibili.jpg')
+      .load(setup)
+
+    function setup() {
+      const bili = new PIXI.Sprite(
+        loader.resources["bili"].texture
+      );
+      bili.width = 50;
+      bili.height = 50;
+
+      app.stage.addChild(bili);
+
+      // 1s内x和y轴移动100
+      TweenMax.to(bili, 1, {
+        pixi: {
+          scaleX: 1.2,
+          scaleY: 1.2,
+          skewX: 10,
+          rotation: 20
+        }
+      });
+
+    }
+  </script>
+</body>
+
+</html>
